@@ -1,0 +1,268 @@
+<!doctype html>
+
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="description" content="Apollo local — sala de trabalho para conversar, planejar e receber entregas.">
+  <meta name="apollo-token" content="__TOKEN__">
+  <title>Apollo · estúdio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>Apollo</h1>
+      <span id="status" role="status" aria-live="polite">Pronto</span>
+    </div>
+    <div>
+      <span aria-label="Projeto atual">Projeto</span>
+      <select id="projectSelect" aria-label="Selecionar projeto"></select>
+    </div>
+  <canvas id="brandGlobe" width="240" height="240" aria-hidden="true" class="brand-globe"></canvas></header>
+
+  <main class="app-shell">
+    
+
+    <nav class="tabs" role="tablist" aria-label="Destinos do Apollo">
+      <button id="tab-chat" type="button" role="tab" aria-selected="true" aria-controls="panel-chat" tabindex="0">
+        Chat
+      </button>
+      <button id="tab-plan" type="button" role="tab" aria-selected="false" aria-controls="panel-plan" tabindex="-1">
+        Plano
+      </button>
+      <button id="tab-results" type="button" role="tab" aria-selected="false" aria-controls="panel-results" tabindex="-1">
+        Resultado
+      </button>
+      <button id="tab-more" type="button" role="tab" aria-selected="false" aria-controls="panel-more" tabindex="-1">
+        Mais…
+      </button>
+    </nav><p id="message" role="status" aria-live="polite"></p>
+
+    <section id="panel-chat" class="panel" role="tabpanel" aria-labelledby="tab-chat" tabindex="0"><div class="chat-heading"><p class="eyebrow">01 / CONVERSA</p><h2>O que precisa acontecer?</h2></div>
+
+      <div id="chat" class="chatlog" aria-live="polite" aria-label="Conversa"></div>
+
+      <form id="chatForm">
+        <label class="sr-only" for="chatInput">Mensagem</label>
+        <textarea id="chatInput" name="chatInput" rows="2" placeholder="O que precisa acontecer?" autocomplete="off" maxlength="8000"></textarea>
+        <button id="voice" type="button" aria-label="Ativar entrada de voz">Ditar texto</button>
+        <button id="sendChat" type="submit">Enviar</button>
+      </form>
+
+      <details class="voice-drawer"><summary>Conversar por voz · opcional</summary><section class="voice-console" aria-labelledby="voiceConsoleTitle">
+        <div>
+          <h2 id="voiceConsoleTitle">Voz opcional</h2><p class="hint">Ative a conversa por voz quando quiser. O áudio será transcrito pela Groq; a síntese usa VoiceStudio local.</p>
+          <canvas id="voiceWave" width="220" height="220" role="img" aria-label="Visualização circular da voz"></canvas>
+        </div>
+
+        <div class="voice-controls">
+          <button id="autoListen" type="button" aria-pressed="false">Ativar conversa por voz</button>
+
+          <span id="captureStatus" role="status" aria-live="polite">
+            Microfone desligado
+          </span>
+
+          <details class="minor"><summary>Transcrição e uso</summary><p id="rawTranscript">Transcrição bruta aguardando entrada.</p><p id="cleanTranscript">Transcrição revisada aguardando entrada.</p><p id="voiceUsage">A voz só será usada quando você permitir.</p></details>
+          
+          
+        </div>
+      </section></details>
+
+      <section aria-label="Retorno falado">
+        
+
+        <label for="autoVoice">
+          Permitir resumo falado
+          <input id="autoVoice" name="autoVoice" type="checkbox">
+        </label>
+
+        <p id="voiceNotice" role="status" aria-live="polite">Voz opcional. A síntese real pode levar dezenas de segundos.</p><button id="playFeedback" type="button" hidden>Ouvir resumo</button><button id="stopFeedback" type="button">Parar áudio</button>
+      </section>
+
+      <details class="goalbox"><summary>Preparar um plano</summary><form id="planForm">
+        <label for="task">
+          Nova tarefa ou objetivo
+          <textarea id="task" name="task" rows="5" placeholder="Descreva o resultado que você quer obter." maxlength="8000"></textarea>
+        </label>
+
+        <label for="strategy">
+          Estratégia
+          <select id="strategy" name="strategy"><option value="plan-small">Plano curto por etapas</option><option value="direct">Uma única entrega</option></select>
+        </label>
+
+        <button id="plan" type="button">Criar plano</button>
+      </form></details>
+    </section>
+
+    <section id="panel-plan" class="panel" role="tabpanel" aria-labelledby="tab-plan" tabindex="0" hidden>
+
+      <header class="plan-header">
+        <span id="planBadge">Nenhum plano ativo</span>
+        <h2 id="planTitle">Plano de trabalho</h2>
+        <details class="goalbox"><summary>Objetivo e requisitos do projeto</summary><p id="planGoal"></p></details>
+      </header>
+
+      <div id="planEmpty">
+        <p>Crie um plano no Chat para começar.</p>
+      </div>
+
+      <div id="planContent" hidden>
+        <div id="progress" aria-label="Progresso do plano"></div>
+
+        <ol id="steps" aria-label="Etapas do plano" class="stepnav"></ol>
+
+        <div id="stepPosition" aria-live="polite">0 / 0</div>
+        <h3 id="stepTitle">Etapa</h3>
+
+        <label for="executor">
+          Executor
+          <select id="executor" name="executor">
+            <option value="claude">Claude</option>
+            <option value="jarvis-programacao">Jarvis programação</option>
+            <option value="apollo">Apollo</option>
+          </select>
+        </label>
+
+        <details id="stepDetails">
+          <summary>Detalhes da etapa</summary>
+          <div>
+            <p id="stepDescription"></p>
+          </div>
+        <section aria-label="Editar etapa">
+          <label for="stepTitleEdit">
+            Título
+            <input id="stepTitleEdit" name="stepTitleEdit" type="text" maxlength="90">
+          </label>
+
+          <label for="stepEdit">
+            Instrução
+            <textarea id="stepEdit" name="stepEdit" rows="6" maxlength="700"></textarea>
+          </label>
+
+          <label for="expected">
+            Entrega esperada
+            <textarea id="expected" name="expected" rows="4" maxlength="240"></textarea>
+          </label>
+
+          <p id="editStatus" role="status" aria-live="polite"></p>
+          <button id="saveStep" type="button">Salvar etapa</button>
+        </section></details>
+
+        
+
+        <p id="approvalStatus" data-status="pending">
+          Aprovação necessária
+        </p><p class="hint">A aprovação vale para esta versão. Cada etapa continua dependendo de uma ação sua.</p>
+
+        <button id="approve" type="button">Aprovar plano</button>
+        <button id="run" type="button">Executar etapa</button>
+        <button id="showResults" type="button">Ver resultado</button>
+        <button id="discard" type="button">Descartar plano</button>
+
+        <div class="step-navigation">
+          <button id="previousStep" type="button">Etapa anterior</button>
+          <button id="nextStep" type="button">Próxima etapa</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-results" class="panel" role="tabpanel" aria-labelledby="tab-results" tabindex="0" hidden>
+
+      <h2 id="resultTitle">Resultados</h2>
+      <p id="resultHint">As entregas aparecerão aqui quando uma etapa terminar.</p><button id="downloadSite" type="button" class="secondary">Baixar site em ZIP</button><p id="downloadHint" class="hint">Disponível para entregas HTML completas.</p>
+      <div id="results" aria-live="polite"></div>
+      <button id="continuePlan" type="button">Continuar plano</button>
+    </section>
+
+    <section id="panel-more" class="panel" role="tabpanel" aria-labelledby="tab-more" tabindex="0" hidden>
+
+      <section class="projectbar" aria-label="Gestão do projeto">
+      <label for="projectName">
+        Nome do projeto
+        <input id="projectName" name="projectName" type="text" autocomplete="off" maxlength="100">
+      </label>
+      <button id="newProject" type="button">Novo projeto</button>
+    </section><h2>Mais</h2>
+
+      <section class="config-group" aria-labelledby="connectionTitle">
+        <h3 id="connectionTitle">Conexões</h3>
+
+        <label for="demo">
+          Modo demonstração
+          <input id="demo" name="demo" type="checkbox">
+        </label>
+
+        <label for="baseUrl">
+          URL base
+          <input id="baseUrl" name="baseUrl" type="url" placeholder="http://localhost">
+        </label>
+
+        <label for="planner">
+          Modelo de planejamento
+          <input id="planner" name="planner" type="text" maxlength="160">
+        </label>
+
+        <label for="worker">
+          Modelo de execução
+          <input id="worker" name="worker" type="text" maxlength="160">
+        </label>
+
+        <label for="chatModel">
+          Modelo de conversa
+          <input id="chatModel" name="chatModel" type="text" maxlength="160">
+        </label>
+
+        <label for="routes">
+          Rotas da API
+          <textarea id="routes" name="routes" rows="7"></textarea>
+        </label>
+
+        <p id="keyStatus" role="status" aria-live="polite"></p>
+        <button id="save" type="button">Salvar configurações</button>
+      </section>
+
+      <section class="config-group" aria-labelledby="voiceSettingsTitle">
+        <h3 id="voiceSettingsTitle">Voz</h3>
+
+        <label for="asrEngine">
+          Reconhecimento de voz
+          <select id="asrEngine" name="asrEngine"><option value="groq">Groq Whisper Turbo — áudio em nuvem</option><option value="local-large">Whisper Large local — mais lento em CPU</option><option value="local-tiny">Whisper Tiny local</option></select>
+        </label>
+
+        <label for="ttsEngine">
+          Síntese de voz
+          <select id="ttsEngine" name="ttsEngine"><option value="omnivoice-subprocess">OmniVoice — voz criada</option><option value="supertonic3">Supertonic-3 — vozes prontas</option></select>
+        </label>
+
+        <label for="voicePreset">
+          Perfil de voz
+          <select id="voicePreset" name="voicePreset"><option value="a284876a">Apollo BR — voz criada (amostra)</option><option value="M1">M1 — padrão</option><option value="M3">M3</option><option value="M4">M4</option><option value="M5">M5</option></select>
+        </label>
+
+        <p id="voiceStatus" role="status" aria-live="polite"></p>
+
+        <div>
+          <button id="checkVoice" type="button">Verificar voz</button>
+          <button id="testVoice" type="button">Testar voz</button>
+          <button id="stopVoice" type="button">Parar voz</button>
+        </div>
+
+        <audio id="voicePlayer" controls preload="none" hidden></audio>
+      </section>
+
+      <section class="config-group" aria-labelledby="auditTitle">
+        <h3 id="auditTitle">Auditoria</h3>
+        <div id="history" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer id="memory">
+    <small>Memória local do Apollo. Aprovação explícita antes da próxima etapa.</small>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

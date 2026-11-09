@@ -1,0 +1,35 @@
+# Segredos e configuração local
+.env
+.env.*
+!.env.example
+**/*secret*
+**/*credential*
+
+# Dados privados do Apollo
+data/
+**/data/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+
+# Logs, backups e temporários
+*.log
+logs/
+backups/
+*.tmp
+*.bak
+
+# Dependências e cache
+node_modules/
+.cache/
+.npm/
+
+# Arquivos locais do Windows
+*.lnk
+Thumbs.db
+Desktop.ini
+
+# Entregas geradas localmente
+entregas/
+*.zip
